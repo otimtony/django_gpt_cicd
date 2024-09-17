@@ -1,0 +1,27 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+      become: yes
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Pull Docker image
+      docker_image:
+        name: django_gpt
+        source: pull
+
+    - name: Run Docker container
+      docker_container:
+        name: django_app
+        image: django_gpt
+        state: started
+        ports:
+          - "80:8000"
