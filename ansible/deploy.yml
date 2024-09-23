@@ -1,26 +1,27 @@
----
-- name: Deploy Docker Image on EC2 Instance
-  hosts: ec2_instance
+- hosts: all
+  become: yes
   tasks:
-    - name: Ensure Docker is installed
-      yum:
-        name: docker
+    - name: Install Docker
+      apt:
+        name: docker.io
         state: present
+      become: yes
 
     - name: Start Docker service
       service:
         name: docker
         state: started
+        enabled: yes
 
-    - name: Pull Docker Image
+    - name: Pull Docker image
       docker_image:
-        name: otimtony/django-gpt-cicd
-        tag: "{{ lookup('env', 'BUILD_ID') }}"
-        pull: yes
-
-    - name: Run Docker Container
-      docker_container:
         name: django-gpt-cicd
-        image: otimtony/django-gpt-cicd:{{ lookup('env', 'BUILD_ID') }}
+        source: pull
+
+    - name: Run Docker container
+      docker_container:
+        name: django_app
+        image: django-gpt-cicd
         state: started
-        restart_policy: always
+        ports:
+          - "80:8000"
